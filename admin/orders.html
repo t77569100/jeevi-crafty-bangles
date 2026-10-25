@@ -7,13 +7,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #C76B85;          /* Dusty Rose */
-      --bg-cream: #FFF8F0;         /* Cream */
-      --accent-gold: #D4AF37;      /* Gold */
-      --text-dark: #3B2A24;        /* Dark Brown */
-      --btn-rose: #B84F70;         /* Rose Pink */
-      --card-pink: #FCE8EF;        /* Soft Pink */
-      --white: #FFFFFF;            /* White */
+      --primary: #C76B85;
+      --bg-cream: #FFF8F0;
+      --text-dark: #3B2A24;
+      --card-pink: #FCE8EF;
+      --white: #FFFFFF;
+      --btn-rose: #B84F70;
     }
 
     * {
@@ -27,35 +26,35 @@
       background-color: var(--bg-cream);
       color: var(--text-dark);
       padding: 16px;
-      padding-bottom: 40px;
+      padding-bottom: 70px;
     }
 
     header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 2px solid var(--card-pink);
+      border-bottom: 1px solid var(--card-pink);
     }
 
-    header h2 {
+    h2 {
       color: var(--primary);
-      font-size: 1.25rem;
+      font-size: 1.3rem;
     }
 
     .nav-links a {
       color: var(--btn-rose);
       text-decoration: none;
-      font-weight: 600;
+      font-weight: bold;
+      margin-left: 14px;
       font-size: 0.9rem;
-      margin-left: 12px;
     }
 
     .order-card {
       background: var(--white);
       border-radius: 12px;
-      padding: 14px;
+      padding: 16px;
       margin-bottom: 16px;
       border: 1px solid var(--card-pink);
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -64,74 +63,59 @@
     .order-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px dashed #eeddd7;
+      font-weight: bold;
+      border-bottom: 1px solid #f0e4e7;
       padding-bottom: 8px;
       margin-bottom: 10px;
+      font-size: 0.9rem;
     }
 
-    .cust-details {
+    .order-details p {
       font-size: 0.85rem;
+      margin-bottom: 6px;
       line-height: 1.4;
-      margin-bottom: 10px;
-      background: var(--card-pink);
-      padding: 8px 12px;
-      border-radius: 8px;
     }
 
-    .items-list {
-      margin-bottom: 10px;
-    }
-
-    .item-line {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.85rem;
-      padding: 3px 0;
-    }
-
-    .order-action {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-top: 1px solid #eeddd7;
-      padding-top: 10px;
-      margin-top: 8px;
-      gap: 10px;
-    }
-
-    select {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #dcccd0;
+    .order-items {
       background: var(--bg-cream);
+      padding: 10px;
+      border-radius: 8px;
+      margin: 10px 0;
       font-size: 0.85rem;
-      outline: none;
-      font-weight: 600;
     }
 
-    .update-btn {
-      background: var(--btn-rose);
-      color: var(--white);
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+    .order-total {
+      font-size: 1rem;
       font-weight: bold;
-      cursor: pointer;
+      color: var(--btn-rose);
+      text-align: right;
+      margin-top: 6px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      background: #fff3cd;
+      color: #856404;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h2>Orders Management</h2>
+    <h2>ஆர்டர்கள் மேலாண்மை</h2>
     <div class="nav-links">
       <a href="index.html">Products</a>
+      <a href="../index.html">Storefront</a>
     </div>
   </header>
 
-  <div id="adminOrdersContainer">ஆர்டர்கள் ஏற்றப்படுகின்றன...</div>
+  <div id="ordersContainer">
+    <p style="text-align: center; color: #888;">ஆர்டர்கள் ஏற்றப்படுகின்றன...</p>
+  </div>
 
   <script type="module">
     import { 
@@ -139,103 +123,77 @@
       db, 
       collection, 
       getDocs, 
-      doc, 
-      updateDoc, 
       onAuthStateChanged 
     } from "../js/firebase-config.js";
 
     const ADMIN_EMAIL = "tharuntharu7489@gmail.com";
-    const container = document.getElementById("adminOrdersContainer");
+    const ordersContainer = document.getElementById("ordersContainer");
 
-    // Admin Auth Check
-    onAuthStateChanged(auth, (user) => {
-      if (!user || user.email !== ADMIN_EMAIL) {
-        alert("அனுமதி இல்லை! Admin மட்டும் உள்நுழைய முடியும்.");
-        window.location.href = "../login.html";
+    onAuthStateChanged(auth, async (user) => {
+      if (user && user.email === ADMIN_EMAIL) {
+        loadOrders();
       } else {
-        loadAllOrders();
+        alert("அனுமதி இல்லை! Admin மட்டும் இந்த பக்கத்தைப் பார்க்க முடியும்.");
+        window.location.href = "../login.html";
       }
     });
 
-    async function loadAllOrders() {
+    async function loadOrders() {
       try {
         const querySnapshot = await getDocs(collection(db, "orders"));
-
+        
         if (querySnapshot.empty) {
-          container.innerHTML = "<p style='text-align: center; color: #666;'>ஆர்டர்கள் எதுவும் வரவில்லை.</p>";
+          ordersContainer.innerHTML = "<p style='text-align: center; padding: 20px;'>ஆர்டர்கள் எதுவும் இதுவரை வரவில்லை.</p>";
           return;
         }
 
-        container.innerHTML = "";
+        let html = "";
+        querySnapshot.forEach((doc) => {
+          const order = doc.data();
+          
+          // வாடிக்கையாளர் வாங்கிய பொருட்கள் பட்டியல்
+          let itemsListHtml = "";
+          if (order.items && Array.isArray(order.items)) {
+            itemsListHtml = order.items.map(item => `
+              <div>• ${item.name || 'Bangle'} x ${item.quantity || 1} - ₹${item.price || 0}</div>
+            `).join("");
+          } else {
+            itemsListHtml = "<div>விவரங்கள் இல்லை</div>";
+          }
 
-        querySnapshot.forEach((docSnap) => {
-          const order = docSnap.data();
-          const orderId = docSnap.id;
-
-          let itemsHtml = "";
-          order.items.forEach(i => {
-            itemsHtml += `
-              <div class="item-line">
-                <span>${i.name} (x${i.quantity})</span>
-                <span>₹${i.price * i.quantity}</span>
+          html += `
+            <div class="order-card">
+              <div class="order-header">
+                <span>Order ID: #${doc.id.slice(0, 6)}</span>
+                <span class="status-badge">${order.status || 'Pending'}</span>
               </div>
-            `;
-          });
-
-          const card = document.createElement("div");
-          card.className = "order-card";
-          card.innerHTML = `
-            <div class="order-header">
-              <strong>Order ID: #${orderId.substring(0, 6)}</strong>
-              <span style="font-size: 0.8rem; color: #666;">${new Date(order.orderDate).toLocaleDateString()}</span>
-            </div>
-
-            <div class="cust-details">
-              <div><strong>வாடிக்கையாளர்:</strong> ${order.customerName} (${order.phone})</div>
-              <div><strong>முகவரி:</strong> ${order.address}</div>
-              <div><strong>Payment:</strong> ${order.paymentMethod} (${order.paymentStatus || 'Success'})</div>
-            </div>
-
-            <div class="items-list">
-              ${itemsHtml}
-              <div style="text-align: right; font-weight: bold; margin-top: 4px; color: var(--btn-rose);">
-                Total: ₹${order.totalAmount}
+              
+              <div class="order-details">
+                <p><strong>வாடிக்கையாளர் பெயர்:</strong> ${order.name || order.customerName || 'N/A'}</p>
+                <p><strong>தொலைபேசி எண்:</strong> <a href="tel:${order.phone}">${order.phone || 'N/A'}</a></p>
+                <p><strong>முகவரி:</strong> ${order.address || 'N/A'}</p>
+                <p><strong>ஆர்டர் தேதி:</strong> ${order.date || order.createdAt ? new Date(order.createdAt?.toDate ? order.createdAt.toDate() : order.createdAt || Date.now()).toLocaleDateString() : 'N/A'}</p>
               </div>
-            </div>
 
-            <div class="order-action">
-              <select id="status-${orderId}">
-                <option value="Placed" ${order.orderStatus === 'Placed' ? 'selected' : ''}>Placed</option>
-                <option value="Confirmed" ${order.orderStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                <option value="Packed" ${order.orderStatus === 'Packed' ? 'selected' : ''}>Packed</option>
-                <option value="Shipped" ${order.orderStatus === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                <option value="Delivered" ${order.orderStatus === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                <option value="Cancelled" ${order.orderStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-              </select>
-              <button class="update-btn" onclick="updateOrderStatus('${orderId}')">Update Status</button>
+              <div class="order-items">
+                <strong>பொருட்கள்:</strong>
+                ${itemsListHtml}
+              </div>
+
+              <div class="order-total">
+                மொத்த தொகை: ₹${order.total || order.totalAmount || 0}
+              </div>
             </div>
           `;
-          container.appendChild(card);
         });
 
+        ordersContainer.innerHTML = html;
+
       } catch (err) {
-        container.innerHTML = `<p style="color: red;">பிழை: ${err.message}</p>`;
+        console.error("Order load error:", err);
+        ordersContainer.innerHTML = `<p style="color: red; text-align: center;">பிழை: ${err.message}</p>`;
       }
     }
-
-    // Status Update Function
-    window.updateOrderStatus = async (orderId) => {
-      const newStatus = document.getElementById(`status-${orderId}`).value;
-      try {
-        await updateDoc(doc(db, "orders", orderId), {
-          orderStatus: newStatus
-        });
-        alert("ஆர்டர் நிலை மாற்றப்பட்டது: " + newStatus);
-      } catch (err) {
-        alert("நிலை மாற்றுவதில் பிழை: " + err.message);
-      }
-    };
   </script>
 </body>
-  </html>
-                                     
+</html>
