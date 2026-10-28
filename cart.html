@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -110,6 +110,17 @@
       margin-bottom: 4px;
     }
 
+    .size-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: var(--text-dark);
+      background-color: var(--card-pink);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
     .cart-price {
       font-size: 0.95rem;
       font-weight: 700;
@@ -201,18 +212,18 @@
 
     <div class="empty-cart" id="emptyCart">
       <i class="fa-solid fa-bag-shopping"></i>
-      <h3>உங்கள் Cart காலியாக உள்ளது!</h3>
-      <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">அழகான கைவினை வளையல்களைத் தேர்ந்தெடுங்கள்.</p>
+      <h3>Your cart is empty!</h3>
+      <p style="color: #666; font-size: 0.85rem; margin-top: 4px;">Explore our handcrafted bangles collection.</p>
       <a href="index.html" class="shop-now-btn">Start Shopping</a>
     </div>
   </div>
 
   <div class="checkout-footer" id="checkoutFooter">
     <div class="total-box">
-      <span>மொத்தத் தொகை (Subtotal)</span>
+      <span>Subtotal</span>
       <h3 id="cartTotal">₹0</h3>
     </div>
-    <button class="checkout-btn" id="proceedBtn">Checkout</button>
+    <button class="checkout-btn" id="proceedBtn">Proceed to Checkout</button>
   </div>
 
   <script type="module">
@@ -220,7 +231,7 @@
 
     let currentUser = null;
 
-    // Login சரிபார்ப்பு
+    // Login State Verification
     onAuthStateChanged(auth, (user) => {
       currentUser = user;
     });
@@ -246,18 +257,22 @@
       let total = 0;
 
       cart.forEach((item, index) => {
-        total += item.price * item.quantity;
+        const itemQty = item.quantity || 1;
+        total += item.price * itemQty;
+        const imgSrc = item.imageUrl || item.img || "https://via.placeholder.com/75";
+        const itemSize = item.size || "Free Size";
 
         const card = document.createElement("div");
         card.className = "cart-card";
         card.innerHTML = `
-          <img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/75'">
+          <img src="${imgSrc}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/75'">
           <div class="cart-info">
             <h4>${item.name}</h4>
+            <div><span class="size-tag">Size: ${itemSize}</span></div>
             <div class="cart-price">₹${item.price}</div>
             <div class="qty-controls">
               <button class="qty-btn" onclick="updateQty(${index}, -1)">-</button>
-              <span class="qty-number">${item.quantity}</span>
+              <span class="qty-number">${itemQty}</span>
               <button class="qty-btn" onclick="updateQty(${index}, 1)">+</button>
             </div>
           </div>
@@ -271,9 +286,9 @@
       document.getElementById("cartTotal").innerText = `₹${total}`;
     }
 
-    // எண்ணிக்கை மாற்றுதல்
+    // Quantity update
     window.updateQty = (index, change) => {
-      cart[index].quantity += change;
+      cart[index].quantity = (cart[index].quantity || 1) + change;
       if (cart[index].quantity <= 0) {
         cart.splice(index, 1);
       }
@@ -281,17 +296,17 @@
       renderCart();
     };
 
-    // நீக்குதல்
+    // Remove single item
     window.removeItem = (index) => {
       cart.splice(index, 1);
       localStorage.setItem("cart", JSON.stringify(cart));
       renderCart();
     };
 
-    // Checkout பாதுகாப்பு (Login verification)
+    // Checkout redirect check
     document.getElementById("proceedBtn").onclick = () => {
       if (!currentUser) {
-        alert("ஆர்டர் செய்ய முதலில் Login செய்ய வேண்டும்!");
+        alert("Please login first to place your order.");
         window.location.href = "login.html";
       } else {
         window.location.href = "checkout.html";
