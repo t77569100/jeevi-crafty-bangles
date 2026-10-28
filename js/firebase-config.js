@@ -17,7 +17,9 @@ import {
   updateDoc, 
   deleteDoc, 
   query, 
-  where 
+  where,
+  orderBy,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -30,10 +32,12 @@ const firebaseConfig = {
   measurementId: "G-Z449JBWFR5"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Export all required modular methods
 export { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -48,5 +52,7 @@ export {
   updateDoc, 
   deleteDoc, 
   query, 
-  where 
+  where,
+  orderBy,
+  serverTimestamp
 };
