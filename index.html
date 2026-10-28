@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +29,69 @@
       padding-bottom: 70px;
     }
 
+    /* --- Splash Screen / Brand Intro --- */
+    #splash-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-cream);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+
+    .splash-logo-container {
+      text-align: center;
+      animation: splashPop 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .splash-brand {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 1px;
+    }
+
+    .splash-tagline {
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      margin-top: 6px;
+      font-weight: 500;
+    }
+
+            .splash-logo-img {
+      width: 250px;            /* அளவை 95px-லிருந்து 140px ஆக உயர்த்தியுள்ளோம் */
+      height: 250px;           /* அகலத்திற்கு ஏற்ப உயரமும் 140px */
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 16px;
+      
+      animation: splashLogoPop 1s ease-out;
+    }
+
+
+    @keyframes splashLogoPop {
+      0% { transform: scale(0.6); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+
+    @keyframes spinRing {
+      100% { transform: rotate(360deg); }
+    }
+
+    .splash-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* --- Header & Navigation --- */
     header {
       padding: 16px;
       display: flex;
@@ -113,6 +176,7 @@
       border-radius: 20px;
       font-weight: bold;
       font-size: 0.8rem;
+      cursor: pointer;
     }
 
     .section-title {
@@ -165,6 +229,14 @@
       border: 1px solid var(--card-pink);
       display: flex;
       flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .product-card-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
     }
 
     .product-img {
@@ -243,6 +315,17 @@
 </head>
 <body>
 
+  <!-- Splash Screen / Brand Intro Screen -->
+    <!-- Splash Screen / Brand Intro Screen -->
+  <div id="splash-screen">
+    <div class="splash-logo-container">
+      <img src="logo.png" class="splash-logo-img" alt="Jeevi Crafts Logo" onerror="this.src='https://via.placeholder.com/95/C76B85/FFFFFF?text=Jeevi'">
+      <div class="splash-brand">Jeevi Crafts</div>
+      <div class="splash-tagline">Handmade Bangles & Artistic Crafts</div>
+    </div>
+  </div>
+
+
   <header>
     <div class="brand-title">Jeevi Crafts</div>
     <div class="header-icons">
@@ -254,16 +337,16 @@
   </header>
 
   <div class="search-box">
-    <input type="text" id="searchInput" class="search-input" placeholder="🔍 வளையல்கள் மற்றும் கிராஃப்ட் தேடுக...">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search bangles and handmade crafts...">
   </div>
 
   <div class="banner">
     <h3>Silk Thread Sets</h3>
-    <p>பாரம்பரிய கைவினை வளையல்கள் 20% தள்ளுபடி</p>
+    <p>Traditional handmade bangles with flat 20% OFF</p>
     <button class="banner-btn">Explore Now</button>
   </div>
 
-  <div class="section-title">வகைகள் (Categories)</div>
+  <div class="section-title">Categories</div>
   <div class="categories">
     <div class="cat-chip active" onclick="filterCat('All')">All</div>
     <div class="cat-chip" onclick="filterCat('Silk Thread')">Silk Thread</div>
@@ -272,9 +355,9 @@
     <div class="cat-chip" onclick="filterCat('Handmade Crafts')">Handmade Crafts</div>
   </div>
 
-  <div class="section-title">பிரபலமானவை (Featured)</div>
+  <div class="section-title">Featured Products</div>
   <div class="products-grid" id="productsContainer">
-    <p style="padding: 16px; color: #666; grid-column: span 2;">பொருட்கள் ஏற்றப்படுகின்றன...</p>
+    <p style="padding: 16px; color: #666; grid-column: span 2;">Loading products...</p>
   </div>
 
   <!-- Bottom Navigation Bar -->
@@ -291,7 +374,6 @@
       <i class="fa-solid fa-box-archive"></i>
       <span>Orders</span>
     </a>
-    <!-- Dynamic Login/Admin/Profile Button -->
     <a href="login.html" class="nav-item" id="authNavBtn">
       <i class="fa-solid fa-user" id="authIcon"></i>
       <span id="authText">Login</span>
@@ -308,6 +390,16 @@
       signOut 
     } from "./js/firebase-config.js";
 
+    // Automatic Splash Screen fade out
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        const splash = document.getElementById("splash-screen");
+        if (splash) {
+          splash.classList.add("splash-hidden");
+        }
+      }, 1800);
+    });
+
     const ADMIN_EMAIL = "tharuntharu7489@gmail.com";
     const authNavBtn = document.getElementById("authNavBtn");
     const authText = document.getElementById("authText");
@@ -317,29 +409,26 @@
 
     let allProducts = [];
 
-    // Login நிலை மற்றும் Admin சரிபார்ப்பு
+    // Authentication and Admin Role Check
     onAuthStateChanged(auth, (user) => {
       if (user) {
         if (user.email === ADMIN_EMAIL) {
-          // Admin ஆக இருந்தால் நேரடியாக Admin பக்கம் செல்ல வழி
           authText.innerText = "Admin";
           authIcon.className = "fa-solid fa-user-shield";
           authNavBtn.href = "admin/index.html";
           authNavBtn.onclick = null;
         } else {
-          // சாதாரண பயனர் எனில் Logout வசதி
           authText.innerText = "Logout";
           authIcon.className = "fa-solid fa-right-from-bracket";
           authNavBtn.href = "#";
           authNavBtn.onclick = async (e) => {
             e.preventDefault();
             await signOut(auth);
-            alert("வெற்றிகரமாக வெளியேறிவிட்டீர்கள் (Logged out)!");
+            alert("You have been logged out successfully!");
             window.location.reload();
           };
         }
       } else {
-        // லாகின் செய்யாத போது Login பக்கத்திற்கு செல்லுதல்
         authText.innerText = "Login";
         authIcon.className = "fa-solid fa-user";
         authNavBtn.href = "login.html";
@@ -347,15 +436,15 @@
       }
     });
 
-    // Cart Count Update
+    // Update Cart Badge Counter
     function updateCartBadge() {
       const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
       cartCount.innerText = totalItems;
     }
     updateCartBadge();
 
-    // Load Products
+    // Fetch Products from Firestore
     async function fetchProducts() {
       try {
         const querySnapshot = await getDocs(collection(db, "products"));
@@ -365,21 +454,26 @@
         });
         renderProducts(allProducts);
       } catch (err) {
-        container.innerHTML = "<p style='color: red; padding: 16px;'>பொருட்களை ஏற்றுவதில் பிழை.</p>";
+        container.innerHTML = "<p style='color: red; padding: 16px;'>Failed to load products.</p>";
       }
     }
 
+    // Render Product Cards linked to product.html?id=...
     function renderProducts(items) {
       if (items.length === 0) {
-        container.innerHTML = "<p style='padding: 16px; color: #666; grid-column: span 2;'>பொருட்கள் எதுவும் இல்லை.</p>";
+        container.innerHTML = "<p style='padding: 16px; color: #666; grid-column: span 2;'>No products found.</p>";
         return;
       }
       container.innerHTML = items.map(p => `
         <div class="product-card">
-          <img src="${p.imageUrl}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150'">
-          <div class="product-info">
-            <div class="product-name">${p.name}</div>
-            <div class="product-price">₹${p.price}</div>
+          <a href="product.html?id=${p.id}" class="product-card-link">
+            <img src="${p.imageUrl}" class="product-img" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150'">
+            <div class="product-info">
+              <div class="product-name">${p.name}</div>
+              <div class="product-price">₹${p.price}</div>
+            </div>
+          </a>
+          <div style="padding: 0 10px 10px;">
             <button class="add-btn" onclick="addToCart('${p.id}', '${p.name}', ${p.price}, '${p.imageUrl}')">Add to Cart</button>
           </div>
         </div>
@@ -398,18 +492,18 @@
       }
     };
 
-    // Add To Cart
+    // Add To Cart Functionality (Defaults to Free Size from Home view)
     window.addToCart = (id, name, price, imageUrl) => {
       let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      const existing = cart.find(i => i.id === id);
+      const existing = cart.find(i => i.id === id && i.size === "Free Size");
       if (existing) {
         existing.quantity += 1;
       } else {
-        cart.push({ id, name, price, imageUrl, quantity: 1 });
+        cart.push({ id, name, price, imageUrl, size: "Free Size", quantity: 1 });
       }
       localStorage.setItem("cart", JSON.stringify(cart));
       updateCartBadge();
-      alert("பொருள் கார்ட்டில் சேர்க்கப்பட்டது!");
+      alert("Item added to cart!");
     };
 
     // Search Filter
