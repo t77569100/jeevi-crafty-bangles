@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,10 +53,10 @@
     .order-card {
       background: var(--white);
       border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
       border: 1px solid var(--card-pink);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     .order-header {
@@ -64,8 +64,8 @@
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px dashed #eeddd7;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .order-id {
@@ -76,7 +76,7 @@
 
     .status-badge {
       font-size: 0.75rem;
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 12px;
       font-weight: 600;
       text-transform: uppercase;
@@ -89,18 +89,92 @@
     .status-delivered { background: #d4edda; color: #155724; }
     .status-cancelled { background: #f8d7da; color: #721c24; }
 
+    /* Visual Tracker */
+    .tracker-container {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 16px 4px 20px;
+    }
+
+    .tracker-line {
+      position: absolute;
+      top: 13px;
+      left: 10%;
+      width: 80%;
+      height: 3px;
+      background: #e6dad7;
+      z-index: 1;
+    }
+
+    .tracker-progress {
+      position: absolute;
+      top: 13px;
+      left: 10%;
+      height: 3px;
+      background: var(--primary);
+      z-index: 2;
+      transition: width 0.4s ease;
+    }
+
+    .track-step {
+      position: relative;
+      z-index: 3;
+      text-align: center;
+      width: 25%;
+    }
+
+    .step-dot {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #e6dad7;
+      color: #777;
+      margin: 0 auto 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .track-step.completed .step-dot,
+    .track-step.active .step-dot {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .track-label {
+      font-size: 0.7rem;
+      color: #777;
+      font-weight: 500;
+    }
+
+    .track-step.active .track-label,
+    .track-step.completed .track-label {
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+
+    /* Items */
     .item-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #f9f2f2;
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
     }
 
     .item-img {
-      width: 45px;
-      height: 45px;
+      width: 50px;
+      height: 50px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
     .item-info {
@@ -108,25 +182,96 @@
       font-size: 0.85rem;
     }
 
+    .item-size-tag {
+      font-size: 0.75rem;
+      color: var(--btn-rose);
+      font-weight: 600;
+      background: var(--card-pink);
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 2px 0;
+    }
+
     .order-footer {
       border-top: 1px solid #eeddd7;
-      padding-top: 8px;
-      margin-top: 8px;
+      padding-top: 10px;
+      margin-top: 10px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.85rem;
     }
 
     .order-total {
       font-weight: bold;
       color: var(--btn-rose);
-      font-size: 0.95rem;
+      font-size: 1rem;
+    }
+
+    /* Action Buttons (Cancel / Return) */
+    .action-btn-row {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #eeddd7;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn-cancel-order {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-cancel-order:hover {
+      background: #f1b0b7;
+    }
+
+    .btn-return-order {
+      background: #e2e3e5;
+      color: #383d41;
+      border: 1px solid #d6d8db;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-return-order:hover {
+      background: #d4d6d8;
     }
 
     .no-orders {
       text-align: center;
-      padding: 40px 10px;
+      padding: 50px 20px;
       color: #777;
+    }
+
+    .no-orders i {
+      font-size: 3rem;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .shop-now-btn {
+      display: inline-block;
+      margin-top: 14px;
+      background: var(--btn-rose);
+      color: var(--white);
+      padding: 10px 22px;
+      border-radius: 20px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.85rem;
     }
   </style>
 </head>
@@ -137,73 +282,189 @@
     <h2>My Orders</h2>
   </header>
 
-  <div id="ordersContainer">ஆர்டர்கள் ஏற்றப்படுகின்றன...</div>
+  <div id="ordersContainer">
+    <p style="text-align:center; padding: 30px; color:#666;">Loading your orders...</p>
+  </div>
 
   <script type="module">
-    import { auth, db, collection, query, where, getDocs, onAuthStateChanged } from "./js/firebase-config.js";
+    import { 
+      auth, 
+      db, 
+      collection, 
+      query, 
+      where, 
+      getDocs, 
+      doc, 
+      updateDoc, 
+      onAuthStateChanged 
+    } from "./js/firebase-config.js";
 
+    const WHATSAPP_PHONE_NUMBER = "919585358971";
     const container = document.getElementById("ordersContainer");
+
+    const STATUS_FLOW = ["Placed", "Confirmed", "Shipped", "Delivered"];
+
+    function getTrackerProgressWidth(status) {
+      const idx = STATUS_FLOW.indexOf(status);
+      if (idx <= 0) return "0%";
+      if (idx === 1) return "26%";
+      if (idx === 2) return "53%";
+      if (idx >= 3) return "80%";
+      return "0%";
+    }
+
+    function renderTracker(currentStatus) {
+      if (currentStatus === "Cancelled") {
+        return `<div style="text-align:center; padding:8px; color:#721c24; font-size:0.85rem; font-weight:bold;">This order has been cancelled.</div>`;
+      }
+
+      const activeIndex = STATUS_FLOW.indexOf(currentStatus);
+      const width = getTrackerProgressWidth(currentStatus);
+
+      let stepsHtml = STATUS_FLOW.map((step, idx) => {
+        let stateClass = "";
+        if (idx < activeIndex) stateClass = "completed";
+        else if (idx === activeIndex) stateClass = "active";
+
+        return `
+          <div class="track-step ${stateClass}">
+            <div class="step-dot">${idx < activeIndex ? '✓' : idx + 1}</div>
+            <div class="track-label">${step}</div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="tracker-container">
+          <div class="tracker-line"></div>
+          <div class="tracker-progress" style="width: ${width};"></div>
+          ${stepsHtml}
+        </div>
+      `;
+    }
+
+    // Cancel Order Handler
+    window.cancelOrder = async (orderId) => {
+      if (confirm("Are you sure you want to cancel this order?")) {
+        try {
+          await updateDoc(doc(db, "orders", orderId), {
+            orderStatus: "Cancelled"
+          });
+          alert("Order cancelled successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Error cancelling order: " + err.message);
+        }
+      }
+    };
+
+    // Return Order Handler (via WhatsApp)
+    window.requestReturn = (orderId) => {
+      const returnMsg = encodeURIComponent(
+        `Hello Jeevi Crafts! I would like to request a return for my order:\n\n` +
+        `• Order ID: #${orderId.substring(0, 8).toUpperCase()}\n\n` +
+        `Kindly assist me with the return process.`
+      );
+      window.open(`https://wa.me/${WHATSAPP_PHONE_NUMBER}?text=${returnMsg}`, '_blank');
+    };
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        alert("ஆர்டர்களைப் பார்க்க முதலில் Login செய்யவும்!");
+        alert("Please log in first to view your orders!");
         window.location.href = "login.html";
         return;
       }
 
       try {
-        // தற்போதைய பயனரின் ஆர்டர்களை மட்டும் எடுத்தல்
         const q = query(collection(db, "orders"), where("userId", "==", user.uid));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
           container.innerHTML = `
             <div class="no-orders">
-              <i class="fa-solid fa-box-open" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
-              <p>நீங்கள் இன்னும் எந்த ஆர்டரும் செய்யவில்லை.</p>
+              <i class="fa-solid fa-box-open"></i>
+              <h3>No Orders Placed Yet!</h3>
+              <p style="margin-top: 4px; font-size: 0.85rem;">Discover our handcrafted bangle collections today.</p>
+              <a href="index.html" class="shop-now-btn">Start Shopping</a>
             </div>
           `;
           return;
         }
 
+        let ordersList = [];
+        querySnapshot.forEach((docSnap) => {
+          ordersList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        ordersList.sort((a, b) => new Date(b.orderDate || 0) - new Date(a.orderDate || 0));
+
         container.innerHTML = "";
 
-        querySnapshot.forEach((docSnap) => {
-          const order = docSnap.data();
-          const orderId = docSnap.id;
-          const statusClass = `status-${(order.orderStatus || 'placed').toLowerCase()}`;
+        ordersList.forEach((order) => {
+          const status = order.orderStatus || "Placed";
+          const statusClass = `status-${status.toLowerCase()}`;
 
           let itemsHtml = "";
-          order.items.forEach(item => {
+          (order.items || []).forEach(item => {
+            const imgSrc = item.imageUrl || item.img || "https://via.placeholder.com/50";
+            const sizeLabel = item.size ? `Size: ${item.size}` : "Free Size";
             itemsHtml += `
               <div class="item-row">
-                <img src="${item.img}" class="item-img" alt="${item.name}" onerror="this.src='https://via.placeholder.com/45'">
+                <img src="${imgSrc}" class="item-img" alt="${item.name}" onerror="this.src='https://via.placeholder.com/50'">
                 <div class="item-info">
                   <div><strong>${item.name}</strong></div>
-                  <div style="color: #666;">அளவு: ${item.quantity} | ₹${item.price}</div>
+                  <div><span class="item-size-tag">${sizeLabel}</span></div>
+                  <div style="color: #666;">Qty: ${item.quantity || 1} × ₹${item.price}</div>
                 </div>
               </div>
             `;
           });
 
+          // Action Buttons Condition
+          let actionBtnHtml = "";
+          if (status === "Placed" || status === "Confirmed") {
+            actionBtnHtml = `
+              <div class="action-btn-row">
+                <button class="btn-cancel-order" onclick="cancelOrder('${order.id}')">
+                  <i class="fa-solid fa-ban"></i> Cancel Order
+                </button>
+              </div>
+            `;
+          } else if (status === "Delivered") {
+            actionBtnHtml = `
+              <div class="action-btn-row">
+                <button class="btn-return-order" onclick="requestReturn('${order.id}')">
+                  <i class="fa-solid fa-rotate-left"></i> Request Return
+                </button>
+              </div>
+            `;
+          }
+
           const card = document.createElement("div");
           card.className = "order-card";
           card.innerHTML = `
             <div class="order-header">
-              <span class="order-id">Order ID: #${orderId.substring(0, 6)}</span>
-              <span class="status-badge ${statusClass}">${order.orderStatus}</span>
+              <span class="order-id">Order ID: #${order.id.substring(0, 8).toUpperCase()}</span>
+              <span class="status-badge ${statusClass}">${status}</span>
             </div>
-            ${itemsHtml}
+
+            <!-- Visual Progress Tracker -->
+            ${renderTracker(status)}
+
+            <div style="margin: 10px 0;">${itemsHtml}</div>
+
             <div class="order-footer">
-              <span>Payment: ${order.paymentMethod}</span>
+              <span style="color:#666;">Payment: <b>${order.paymentMethod || 'COD'}</b></span>
               <span class="order-total">Total: ₹${order.totalAmount}</span>
             </div>
+
+            ${actionBtnHtml}
           `;
           container.appendChild(card);
         });
 
       } catch (err) {
-        container.innerHTML = `<p style="color: red; text-align: center;">பிழை: ${err.message}</p>`;
+        container.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">Error loading orders: ${err.message}</p>`;
       }
     });
   </script>
