@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,7 @@
       --card-pink: #FCE8EF;
       --white: #FFFFFF;
       --btn-rose: #B84F70;
+      --accent-gold: #D4AF37;
     }
 
     * {
@@ -35,7 +36,7 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid var(--card-pink);
+      border-bottom: 2px solid var(--card-pink);
     }
 
     h2 {
@@ -63,33 +64,17 @@
     .order-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-weight: bold;
-      border-bottom: 1px solid #f0e4e7;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+      border-bottom: 1px dashed #eeddd7;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
       font-size: 0.9rem;
     }
 
-    .order-details p {
-      font-size: 0.85rem;
-      margin-bottom: 6px;
-      line-height: 1.4;
-    }
-
-    .order-items {
-      background: var(--bg-cream);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      font-size: 0.85rem;
-    }
-
-    .order-total {
-      font-size: 1rem;
-      font-weight: bold;
-      color: var(--btn-rose);
-      text-align: right;
-      margin-top: 6px;
+    .order-id {
+      color: var(--text-dark);
+      font-weight: 700;
     }
 
     .status-badge {
@@ -98,23 +83,104 @@
       border-radius: 12px;
       font-size: 0.75rem;
       font-weight: bold;
-      background: #fff3cd;
-      color: #856404;
+      text-transform: uppercase;
+    }
+
+    .status-placed { background: #fff3cd; color: #856404; }
+    .status-confirmed { background: #d1ecf1; color: #0c5460; }
+    .status-packed { background: #e2e3e5; color: #383d41; }
+    .status-shipped { background: #cce5ff; color: #004085; }
+    .status-delivered { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+
+    .order-details p {
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .order-details a {
+      color: var(--btn-rose);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .order-items {
+      background: var(--bg-cream);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-size: 0.85rem;
+      border: 1px solid #eeddd7;
+    }
+
+    .item-entry {
+      padding: 4px 0;
+      border-bottom: 1px dashed #e6dad7;
+    }
+
+    .item-entry:last-child {
+      border-bottom: none;
+    }
+
+    .item-size-badge {
+      font-size: 0.75rem;
+      background: var(--card-pink);
+      color: var(--btn-rose);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 4px;
+    }
+
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-top: 1px solid #eeddd7;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .order-total {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--btn-rose);
+    }
+
+    .status-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-select {
+      padding: 6px 10px;
+      border: 1px solid var(--btn-rose);
+      border-radius: 6px;
+      background: var(--white);
+      color: var(--text-dark);
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <h2>ஆர்டர்கள் மேலாண்மை</h2>
+    <h2>Orders Management</h2>
     <div class="nav-links">
-      <a href="index.html">Products</a>
-      <a href="../index.html">Storefront</a>
+      <a href="index.html"><i class="fa-solid fa-boxes-stacked"></i> Products</a>
+      <a href="../index.html"><i class="fa-solid fa-store"></i> Storefront</a>
     </div>
   </header>
 
   <div id="ordersContainer">
-    <p style="text-align: center; color: #888;">ஆர்டர்கள் ஏற்றப்படுகின்றன...</p>
+    <p style="text-align: center; color: #888; padding: 30px;">Loading customer orders...</p>
   </div>
 
   <script type="module">
@@ -123,6 +189,8 @@
       db, 
       collection, 
       getDocs, 
+      doc, 
+      updateDoc, 
       onAuthStateChanged 
     } from "../js/firebase-config.js";
 
@@ -133,7 +201,7 @@
       if (user && user.email === ADMIN_EMAIL) {
         loadOrders();
       } else {
-        alert("அனுமதி இல்லை! Admin மட்டும் இந்த பக்கத்தைப் பார்க்க முடியும்.");
+        alert("Access denied! Only administrators can view this page.");
         window.location.href = "../login.html";
       }
     });
@@ -143,45 +211,75 @@
         const querySnapshot = await getDocs(collection(db, "orders"));
         
         if (querySnapshot.empty) {
-          ordersContainer.innerHTML = "<p style='text-align: center; padding: 20px;'>ஆர்டர்கள் எதுவும் இதுவரை வரவில்லை.</p>";
+          ordersContainer.innerHTML = "<p style='text-align: center; padding: 30px; color: #666;'>No orders received yet.</p>";
           return;
         }
 
+        let ordersList = [];
+        querySnapshot.forEach((docSnap) => {
+          ordersList.push({ id: docSnap.id, ...docSnap.data() });
+        });
+
+        // Show latest orders first
+        ordersList.sort((a, b) => new Date(b.orderDate || 0) - new Date(a.orderDate || 0));
+
         let html = "";
-        querySnapshot.forEach((doc) => {
-          const order = doc.data();
-          
-          // வாடிக்கையாளர் வாங்கிய பொருட்கள் பட்டியல்
+        ordersList.forEach((order) => {
+          const currentStatus = order.orderStatus || order.status || "Placed";
+          const statusClass = `status-${currentStatus.toLowerCase()}`;
+
+          // Format items list
           let itemsListHtml = "";
           if (order.items && Array.isArray(order.items)) {
             itemsListHtml = order.items.map(item => `
-              <div>• ${item.name || 'Bangle'} x ${item.quantity || 1} - ₹${item.price || 0}</div>
+              <div class="item-entry">
+                <b>${item.name || item.title || 'Bangle'}</b> 
+                <span class="item-size-badge">Size: ${item.size || 'Free Size'}</span>
+                — Qty: ${item.quantity || item.qty || 1} × ₹${item.price || 0}
+              </div>
             `).join("");
           } else {
-            itemsListHtml = "<div>விவரங்கள் இல்லை</div>";
+            itemsListHtml = "<div>No items specified.</div>";
           }
 
+          const rawDate = order.orderDate || order.createdAt;
+          const displayDate = rawDate ? new Date(rawDate).toLocaleString() : 'N/A';
+
           html += `
-            <div class="order-card">
+            <div class="order-card" id="card-${order.id}">
               <div class="order-header">
-                <span>Order ID: #${doc.id.slice(0, 6)}</span>
-                <span class="status-badge">${order.status || 'Pending'}</span>
+                <span class="order-id">Order ID: #${order.id.slice(0, 8).toUpperCase()}</span>
+                <span class="status-badge ${statusClass}" id="badge-${order.id}">${currentStatus}</span>
               </div>
               
               <div class="order-details">
-                <p><strong>வாடிக்கையாளர் பெயர்:</strong> ${order.name || order.customerName || 'N/A'}</p>
-                <p><strong>தொலைபேசி எண்:</strong> <a href="tel:${order.phone}">${order.phone || 'N/A'}</a></p>
-                <p><strong>முகவரி:</strong> ${order.address || 'N/A'}</p>
-                <p><strong>ஆர்டர் தேதி:</strong> ${order.date || order.createdAt ? new Date(order.createdAt?.toDate ? order.createdAt.toDate() : order.createdAt || Date.now()).toLocaleDateString() : 'N/A'}</p>
+                <p><strong>Customer Name:</strong> ${order.customerName || order.name || 'N/A'}</p>
+                <p><strong>Phone:</strong> <a href="tel:${order.phone}">${order.phone || 'N/A'}</a></p>
+                <p><strong>Delivery Address:</strong> ${order.address || 'N/A'}</p>
+                <p><strong>Payment Method:</strong> ${order.paymentMethod || 'COD'} (${order.paymentStatus || 'Pending'})</p>
+                <p><strong>Order Date:</strong> ${displayDate}</p>
               </div>
 
               <div class="order-items">
-                <strong>பொருட்கள்:</strong>
+                <strong style="display:block; margin-bottom: 6px;">Ordered Items:</strong>
                 ${itemsListHtml}
               </div>
 
-              <div class="order-total">
-                மொத்த தொகை: ₹${order.total || order.totalAmount || 0}
+              <div class="order-footer">
+                <div class="status-control">
+                  <label for="status-${order.id}"><b>Update Status:</b></label>
+                  <select class="status-select" id="status-${order.id}" onchange="changeOrderStatus('${order.id}', this.value)">
+                    <option value="Placed" ${currentStatus === 'Placed' ? 'selected' : ''}>Placed</option>
+                    <option value="Confirmed" ${currentStatus === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                    <option value="Packed" ${currentStatus === 'Packed' ? 'selected' : ''}>Packed</option>
+                    <option value="Shipped" ${currentStatus === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                    <option value="Delivered" ${currentStatus === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    <option value="Cancelled" ${currentStatus === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                  </select>
+                </div>
+                <div class="order-total">
+                  Total: ₹${order.totalAmount || order.total || 0}
+                </div>
               </div>
             </div>
           `;
@@ -191,9 +289,27 @@
 
       } catch (err) {
         console.error("Order load error:", err);
-        ordersContainer.innerHTML = `<p style="color: red; text-align: center;">பிழை: ${err.message}</p>`;
+        ordersContainer.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">Failed to load orders: ${err.message}</p>`;
       }
     }
+
+    // Step 6: Live Order Status Update Function
+    window.changeOrderStatus = async (orderId, newStatus) => {
+      try {
+        await updateDoc(doc(db, "orders", orderId), {
+          orderStatus: newStatus
+        });
+
+        const badge = document.getElementById(`badge-${orderId}`);
+        if (badge) {
+          badge.textContent = newStatus;
+          badge.className = `status-badge status-${newStatus.toLowerCase()}`;
+        }
+        alert(`Order #${orderId.slice(0, 8).toUpperCase()} status updated to "${newStatus}"!`);
+      } catch (err) {
+        alert("Failed to update status: " + err.message);
+      }
+    };
   </script>
 </body>
 </html>
