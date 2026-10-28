@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -143,18 +143,18 @@
 
     <form id="authForm">
       <div class="form-group" id="nameGroup" style="display: none;">
-        <label for="userName">முழுப் பெயர் (Full Name)</label>
-        <input type="text" id="userName" placeholder="உங்கள் பெயரை உள்ளிடவும்">
+        <label for="userName">Full Name</label>
+        <input type="text" id="userName" placeholder="Enter your full name">
       </div>
 
       <div class="form-group">
-        <label for="userEmail">மின்னஞ்சல் (Email)</label>
+        <label for="userEmail">Email Address</label>
         <input type="email" id="userEmail" required placeholder="name@example.com">
       </div>
 
       <div class="form-group">
-        <label for="userPassword">கடவுச்சொல் (Password)</label>
-        <input type="password" id="userPassword" required placeholder="குறைந்தது 6 எழுத்துக்கள்">
+        <label for="userPassword">Password</label>
+        <input type="password" id="userPassword" required placeholder="At least 6 characters">
       </div>
 
       <button type="submit" class="submit-btn" id="submitBtn">Login</button>
@@ -211,19 +211,19 @@
       try {
         if (isLoginMode) {
           await signInWithEmailAndPassword(auth, email, password);
-          showFeedback("உள்நுழைவு வெற்றி! முகப்புக்கு செல்கிறது...", "success");
+          showFeedback("Login successful! Redirecting to home...", "success");
           setTimeout(() => window.location.href = "index.html", 1200);
         } else {
           const res = await createUserWithEmailAndPassword(auth, email, password);
           
-          // வாடிக்கையாளர் விவரங்களை Firestore-ல் சேமித்தல்
+          // Save customer profile data to Firestore
           await setDoc(doc(db, "users", res.user.uid), {
             name: name || "Customer",
             email: email,
             createdAt: new Date().toISOString()
           });
 
-          showFeedback("கணக்கு உருவாக்கப்பட்டது! முகப்புக்கு செல்கிறது...", "success");
+          showFeedback("Account created successfully! Redirecting to home...", "success");
           setTimeout(() => window.location.href = "index.html", 1200);
         }
       } catch (err) {
